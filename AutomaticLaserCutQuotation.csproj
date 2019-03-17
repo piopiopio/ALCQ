@@ -59,6 +59,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BitmapHelper.cs" />
+    <Compile Include="Material.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="ALCQ.cs" />
     <Compile Include="ViewModelBase.cs" />

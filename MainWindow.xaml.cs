@@ -35,7 +35,6 @@ namespace ReverseKinematic
 
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            //TODO: Zrobić automatyczne skalowanie.
 
             MainWindow1.Height = MainWindow1.Width * 9 / 16 + 24;
             //MainWindow1.Height = MainWindow1.Width * 9 / 16-24;

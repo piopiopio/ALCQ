@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.RightsManagement;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using netDxf;
@@ -8,36 +9,99 @@ namespace ReverseKinematic
 {
     public class Scene : ViewModelBase
     {
+
         public Vector3 MaxXMaxY;
         public Vector3 MinXMinY;
 
         public Scene()
         {
-            MaterialList.Add("Stainless steel");
-            MaterialList.Add("Carbon steel");
-            MaterialList.Add("Aluminium");
-            OnPropertyChanged(nameof(MaterialList));
-
-            MaterialThicknessList.Add(0.5);
-            MaterialThicknessList.Add(1);
-            MaterialThicknessList.Add(2);
-            MaterialThicknessList.Add(3);
-            MaterialThicknessList.Add(4);
-            OnPropertyChanged(nameof(MaterialThicknessList));
+            material.ThresholdReached += Recalculate;
+            markup = 5;
+            pieces = 1;
         }
 
+        void Recalculate(object sender, EventArgs e)
+        {
+            Recalculate();
+        }
+
+        void Recalculate()
+        {
+            OnPropertyChanged(nameof(Length));
+            OnPropertyChanged(nameof(RectangleArea));
+            OnPropertyChanged(nameof(MaterialCost));
+            OnPropertyChanged(nameof(CuttingCost));
+            OnPropertyChanged(nameof(Pieces));
+            OnPropertyChanged(nameof(TotalPrice));
+        }
+
+        private double markup;
+        public double Markup
+        {
+            get { return markup; }
+            set
+            {
+                markup = value;
+                Recalculate();
+            }
+        }
+
+        private double pieces;
+        public double Pieces
+        {
+            get { return pieces; }
+            set
+            {
+                pieces = value;
+                Recalculate();
+            }
+        }
+        public double TotalPrice
+        {
+            get
+            {
+                return pieces*(MaterialCost + CuttingCost) * (1 + Markup / 100) + InitializationFee;
+            }
+        }
+        public double InitializationFee
+        {
+            get { return 10; }
+        }
+        public Material Material
+        {
+            get
+            {
+                return material;
+            }
+            set
+            {
+
+            }
+        }
+
+        public double MaterialCost
+        {
+            get
+            {             
+                return RectangleArea * Material.GetOneMM2Price;
+
+            }
+        }
+
+        public double CuttingCost
+        {
+            get { return Length * Material.SelectedThickness.Item2; }
+        }
+        private Material material = new Material();
         public double RectangleArea
         {
             get => Math.Abs((MaxXMaxY.X - MinXMinY.X) * (MaxXMaxY.Y - MinXMinY.Y));
             set { }
         }
 
-        public double Cost { get; set; }
+
         public double Length { get; set; }
 
-        public List<string> MaterialList { get; set; } = new List<string>();
-
-        public List<double> MaterialThicknessList { get; set; } = new List<double>();
 
         private void ExtendMinMaxCoordinates(Vector3 newPoint)
         {
@@ -90,6 +154,8 @@ namespace ReverseKinematic
 
             var objectList = Calculate(loaded);
             Render(objectList, mainDrawingCanvas);
+
+            Recalculate();
         }
 
         public List<Shape> Calculate(DxfDocument loaded)
@@ -114,8 +180,6 @@ namespace ReverseKinematic
                 Length += item.Length;
             }
 
-            OnPropertyChanged(nameof(Length));
-            OnPropertyChanged(nameof(RectangleArea));
 
             return ObjectList;
         }

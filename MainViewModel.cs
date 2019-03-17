@@ -41,12 +41,14 @@
             }
         }
         #endregion Public Properties
-        #region Private Methods
+
         internal void Render()
         {
-           // _scene.Render();
-
+            // _scene.Render();
         }
+
+        #region Private Methods
+
         #endregion Private Methods
     }
 }

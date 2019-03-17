@@ -173,6 +173,7 @@ namespace ReverseKinematic
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
             var circle = GetCanvasCircle(InputCircle, startVector, canvas.Height);
+
             canvas.Children.Add(circle);
         }
 
@@ -184,6 +185,8 @@ namespace ReverseKinematic
 
             tempEllipse.StrokeThickness = 1;
             tempEllipse.Stroke = Brushes.Black;
+            tempEllipse.SetValue(Canvas.LeftProperty, -InputCircle.Radius+InputCircle.Center.X-startVector.X);
+            tempEllipse.SetValue(Canvas.TopProperty, -InputCircle.Radius-InputCircle.Center.Y+canvasHeight+startVector.Y);
             return tempEllipse;
         }
     }
