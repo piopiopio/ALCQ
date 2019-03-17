@@ -90,7 +90,10 @@ namespace ReverseKinematic
 
         public double CuttingCost
         {
-            get { return Length * Material.SelectedThickness.Item2; }
+            get
+            {
+                return Length * Material.SelectedThickness.Item2;
+            }
         }
         private Material material = new Material();
         public double RectangleArea
@@ -171,6 +174,9 @@ namespace ReverseKinematic
             foreach (var item in loaded.Ellipses) ObjectList.Add(new Ellipse(item));
 
             foreach (var item in loaded.Splines) ObjectList.Add(new Spline(item));
+
+            foreach (var item in loaded.LwPolylines) ObjectList.Add(new LwPolyline(item));
+
 
 
             foreach (var item in ObjectList)

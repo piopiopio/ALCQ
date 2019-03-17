@@ -36,6 +36,28 @@ namespace ReverseKinematic
         }
     }
 
+    public class LwPolyline : Shape
+    {
+        private netDxf.Entities.LwPolyline InputLwPolyline { get; set; }
+        private List<Line> LineCollection=new List<Line>();
+        public LwPolyline(netDxf.Entities.LwPolyline inputLwPolyline)
+        {
+            InputLwPolyline = inputLwPolyline;
+
+            for (int i = 1; i < InputLwPolyline.Vertexes.Count; i++)
+            {
+                LineCollection.Add(new Line(InputLwPolyline.Vertexes[i-1], InputLwPolyline.Vertexes[i]));
+            }
+            }
+
+        public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
+        {
+            foreach (var item in LineCollection)
+            {
+                item.Draw(canvas, startVector, lineWidth);
+            }
+        }
+    }
     public class Spline : Shape
     {
         private netDxf.Entities.Spline InputSpline { get; set; }
@@ -312,6 +334,23 @@ namespace ReverseKinematic
 
             tempMin.Y = Math.Min(inputLine.StartPoint.Y, inputLine.EndPoint.Y);
             tempMax.Y = Math.Max(inputLine.StartPoint.Y, inputLine.EndPoint.Y);
+
+            MinXMinY = tempMin;
+            MaxXMaxY = tempMax;
+        }
+
+        public Line(netDxf.Entities.LwPolylineVertex vertex1, netDxf.Entities.LwPolylineVertex vertex2)
+        {
+            InputLine =new netDxf.Entities.Line(vertex1.Position, vertex2.Position);
+            Length = (InputLine.EndPoint - InputLine.StartPoint).Modulus();
+            var tempMin = new Vector3();
+            var tempMax = new Vector3();
+
+            tempMin.X = Math.Min(InputLine.StartPoint.X, InputLine.EndPoint.X);
+            tempMax.X = Math.Max(InputLine.StartPoint.X, InputLine.EndPoint.X);
+
+            tempMin.Y = Math.Min(InputLine.StartPoint.Y, InputLine.EndPoint.Y);
+            tempMax.Y = Math.Max(InputLine.StartPoint.Y, InputLine.EndPoint.Y);
 
             MinXMinY = tempMin;
             MaxXMaxY = tempMax;
