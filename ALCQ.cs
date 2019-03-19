@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using netDxf;
+using netDxf.Entities;
+using Point = System.Windows.Point;
+using Polyline = System.Windows.Shapes.Polyline;
 
 namespace ReverseKinematic
 {
     public abstract class Shape
     {
+        public Vector3 MaxXMaxY = Vector3.NaN;
+
         //The vectors with the smallest and highest coordinates of element. Used for scale scene and sheet area calculation. 
-        public Vector3 MinXMinY;
-        public Vector3 MaxXMaxY;
+        public Vector3 MinXMinY = Vector3.NaN;
 
         //Length of entity
         public double Length { get; set; }
@@ -38,42 +41,41 @@ namespace ReverseKinematic
 
     public class LwPolyline : Shape
     {
-        private netDxf.Entities.LwPolyline InputLwPolyline { get; set; }
-        private List<Shape> LineCollection = new List<Shape>();
+        private readonly List<Shape> LinesOrArcsCollection = new List<Shape>();
+
         public LwPolyline(netDxf.Entities.LwPolyline inputLwPolyline)
         {
             InputLwPolyline = inputLwPolyline;
 
             //for (int i = 1; i < InputLwPolyline.Vertexes.Count; i++)
             //{
-            //    LineCollection.Add(new Line(InputLwPolyline.Vertexes[i - 1], InputLwPolyline.Vertexes[i]));
+            //    LinesOrArcsCollection.Add(new Line(InputLwPolyline.Vertexes[i - 1], InputLwPolyline.Vertexes[i]));
             //}
-            var temp=InputLwPolyline.Explode();
+            var temp = InputLwPolyline.Explode();
             foreach (var item in temp)
-            {
-                if (item.GetType()==typeof(netDxf.Entities.Line))
-                {
-                    LineCollection.Add(new Line((netDxf.Entities.Line)item));
-                }
+                if (item.GetType() == typeof(netDxf.Entities.Line))
+                    LinesOrArcsCollection.Add(new Line((netDxf.Entities.Line) item));
                 else if (item.GetType() == typeof(netDxf.Entities.Arc))
-                {
-                    LineCollection.Add(new Arc((netDxf.Entities.Arc)item));
-                }
+                    LinesOrArcsCollection.Add(new Arc((netDxf.Entities.Arc) item));
+
+            foreach (var item in LinesOrArcsCollection)
+            {
+                CheckIfNewPointExtendArea(item.MaxXMaxY);
+                CheckIfNewPointExtendArea(item.MinXMinY);
             }
         }
 
+        private netDxf.Entities.LwPolyline InputLwPolyline { get; }
+
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
-            foreach (var item in LineCollection)
-            {
-                item.Draw(canvas, startVector, lineWidth);
-            }
+            foreach (var item in LinesOrArcsCollection) item.Draw(canvas, startVector, lineWidth);
         }
     }
+
     public class Spline : Shape
     {
-        private netDxf.Entities.Spline InputSpline { get; set; }
-        private int chordVariable = 0;
+        private readonly int chordVariable;
 
         public Spline(netDxf.Entities.Spline inputSpline)
         {
@@ -81,27 +83,21 @@ namespace ReverseKinematic
 
 
             double polygonLength = 0;
-            for (int i = 0; i < InputSpline.ControlPoints.Count() - 1; i++)
-            {
+            for (var i = 0; i < InputSpline.ControlPoints.Count() - 1; i++)
                 polygonLength += (InputSpline.ControlPoints[i + 1].Position - InputSpline.ControlPoints[i].Position)
                     .Modulus();
-            }
 
-            chordVariable = (int)(polygonLength * 10);
+            chordVariable = (int) (polygonLength * 10);
             var DotsList = inputSpline.PolygonalVertexes(chordVariable);
             MinXMinY = DotsList.First();
             MaxXMaxY = DotsList.First();
-            foreach (var item in DotsList)
-            {
-                CheckIfNewPointExtendArea(item);
-            }
+            foreach (var item in DotsList) CheckIfNewPointExtendArea(item);
 
             Length = 0;
-            for (int i = 0; i < DotsList.Count - 1; i++)
-            {
-                Length += (DotsList[i + 1] - DotsList[i]).Modulus();
-            }
+            for (var i = 0; i < DotsList.Count - 1; i++) Length += (DotsList[i + 1] - DotsList[i]).Modulus();
         }
+
+        private netDxf.Entities.Spline InputSpline { get; }
 
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
@@ -110,14 +106,11 @@ namespace ReverseKinematic
 
         public Polyline GetCanvasSpline(netDxf.Entities.Spline InputSpline, Vector3 startVector, double canvasHeight)
         {
-
-            PointCollection transformedControlPointsList = new PointCollection();
+            var transformedControlPointsList = new PointCollection();
 
             foreach (var item in InputSpline.PolygonalVertexes(chordVariable))
-            {
                 transformedControlPointsList.Add(new Point(item.X - startVector.X,
                     -item.Y + canvasHeight + startVector.Y));
-            }
 
             var g = new StreamGeometry();
             StreamGeometryContext gc;
@@ -127,7 +120,6 @@ namespace ReverseKinematic
                     transformedControlPointsList.First(),
                     false,
                     false);
-
 
 
                 gc.PolyLineTo(transformedControlPointsList, false, false);
@@ -142,7 +134,7 @@ namespace ReverseKinematic
 
 
             //return path;
-            Polyline temp = new Polyline();
+            var temp = new Polyline();
             temp.Stroke = Brushes.Black;
             temp.StrokeThickness = 1;
             temp.Points = transformedControlPointsList;
@@ -168,7 +160,8 @@ namespace ReverseKinematic
             Length = Math.PI * (a + b) * (1 + 3 * h * h / (10 + Math.Sqrt(4 - 3 * h * h)));
         }
 
-        private netDxf.Entities.Ellipse InputEllipse { get; set; }
+        private netDxf.Entities.Ellipse InputEllipse { get; }
+
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
             var ellipse = GetCanvasEllipse(InputEllipse, startVector, canvas.Height);
@@ -178,7 +171,7 @@ namespace ReverseKinematic
         public System.Windows.Shapes.Ellipse GetCanvasEllipse(netDxf.Entities.Ellipse ellipse, Vector3 startVector,
             double canvasHeight)
         {
-            System.Windows.Shapes.Ellipse tempEllipse = new System.Windows.Shapes.Ellipse();
+            var tempEllipse = new System.Windows.Shapes.Ellipse();
             tempEllipse.Height = ellipse.MinorAxis;
             tempEllipse.Width = ellipse.MajorAxis;
 
@@ -186,7 +179,6 @@ namespace ReverseKinematic
             tempEllipse.Stroke = Brushes.Black;
             return tempEllipse;
         }
-
     }
 
     public class Circle : Shape
@@ -202,7 +194,7 @@ namespace ReverseKinematic
             Length = 2 * Math.PI * inputCircle.Radius;
         }
 
-        private netDxf.Entities.Circle InputCircle { get; set; }
+        private netDxf.Entities.Circle InputCircle { get; }
 
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
@@ -211,16 +203,18 @@ namespace ReverseKinematic
             canvas.Children.Add(circle);
         }
 
-        public System.Windows.Shapes.Ellipse GetCanvasCircle(netDxf.Entities.Circle circle, Vector3 startVector, double canvasHeight)
+        public System.Windows.Shapes.Ellipse GetCanvasCircle(netDxf.Entities.Circle circle, Vector3 startVector,
+            double canvasHeight)
         {
-            System.Windows.Shapes.Ellipse tempEllipse = new System.Windows.Shapes.Ellipse();
+            var tempEllipse = new System.Windows.Shapes.Ellipse();
             tempEllipse.Height = 2 * circle.Radius;
             tempEllipse.Width = 2 * circle.Radius;
 
             tempEllipse.StrokeThickness = 1;
             tempEllipse.Stroke = Brushes.Black;
             tempEllipse.SetValue(Canvas.LeftProperty, -InputCircle.Radius + InputCircle.Center.X - startVector.X);
-            tempEllipse.SetValue(Canvas.TopProperty, -InputCircle.Radius - InputCircle.Center.Y + canvasHeight + startVector.Y);
+            tempEllipse.SetValue(Canvas.TopProperty,
+                -InputCircle.Radius - InputCircle.Center.Y + canvasHeight + startVector.Y);
             return tempEllipse;
         }
     }
@@ -230,8 +224,7 @@ namespace ReverseKinematic
         public Arc(netDxf.Entities.Arc inputArc)
         {
             InputArc = inputArc;
-            var tempMin = new Vector3();
-            var tempMax = new Vector3();
+
 
             var startPoint = new Point();
             startPoint.X = inputArc.Radius * Math.Cos(Math.PI * inputArc.StartAngle / 180) + inputArc.Center.X;
@@ -351,7 +344,7 @@ namespace ReverseKinematic
             MaxXMaxY = tempMax;
         }
 
-        public Line(netDxf.Entities.LwPolylineVertex vertex1, netDxf.Entities.LwPolylineVertex vertex2)
+        public Line(LwPolylineVertex vertex1, LwPolylineVertex vertex2)
         {
             InputLine = new netDxf.Entities.Line(vertex1.Position, vertex2.Position);
             Length = (InputLine.EndPoint - InputLine.StartPoint).Modulus();
@@ -371,13 +364,13 @@ namespace ReverseKinematic
         public netDxf.Entities.Line InputLine { get; set; }
 
 
-
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {
             canvas.Children.Add(GetCanvasLine(InputLine, startVector, canvas.Height));
         }
 
-        private System.Windows.Shapes.Line GetCanvasLine(netDxf.Entities.Line line, Vector3 StartVector, double canvasHeight)
+        private System.Windows.Shapes.Line GetCanvasLine(netDxf.Entities.Line line, Vector3 StartVector,
+            double canvasHeight)
         {
             var tempLine = new System.Windows.Shapes.Line();
 

@@ -116,12 +116,12 @@
         <DockPanel Name="MainDockPanel" Grid.Column="0" Grid.Row="0" Background="White">
 
 
-            <Viewbox Name="MainViewbox" Margin="10,10,10,10">
+            <Viewbox Name="MainViewbox" Margin="10,10,10,10" >
 
                 <!--<Grid>-->
 
 
-                <Canvas Background="AliceBlue" Name="MainDrawingCanvas" ZIndex="2" />
+                <Canvas Background="AliceBlue" Name="MainDrawingCanvas" ZIndex="2" MouseDown="MainDrawingCanvas_OnMouseDown"/>
 
                 <!--<ItemsControl ItemsSource="{Binding Scene.ObstaclesCollection}" >
                         <ItemsControl.ItemContainerStyle >
