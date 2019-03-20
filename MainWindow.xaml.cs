@@ -75,6 +75,8 @@ namespace ReverseKinematic
             ////{
             ////    RobotCanvas.RenderTransform = new ScaleTransform(zoom, zoom); // transform Canvas size
             ////}
+
+         
         }
 
 
@@ -82,49 +84,14 @@ namespace ReverseKinematic
         {
             // Bitmap tempBitmap = new Bitmap((int)MainDrawingCanvas.ActualWidth, (int)MainDrawingCanvas.ActualHeight);
             //ExportToPng(new Uri("C:\\Users\\Piotr\\Desktop\\n.png"), MainDrawingCanvas);
-            var tempBitmap=ExportToBitmap("C:\\Users\\Piotr\\Desktop\\n1.png", MainDrawingCanvas);
-          //  tempBitmap.GetPixel((int)((e.GetPosition(MainDrawingCanvas)).X), (int)(e.GetPosition(MainDrawingCanvas).Y));
+           
+            //  tempBitmap.GetPixel((int)((e.GetPosition(MainDrawingCanvas)).X), (int)(e.GetPosition(MainDrawingCanvas).Y));
             //BitmapFloodFill(tempBitmap, (int) e.GetPosition(MainDrawingCanvas).X,
             //    (int) e.GetPosition(MainDrawingCanvas).Y, 9999, 9999, Color.AliceBlue.B);
             //MainDrawingCanvas.Children.Clear();
-            
-            int[,] canvasArray=new int[(int)MainDrawingCanvas.Width, (int)MainDrawingCanvas.Height];
-
-            for (int i = 0; i < tempBitmap.Width; i++)
-            {
-                for (int j = 0; j < tempBitmap.Height; j++)
-                {
-                    if (tempBitmap.GetPixel(i, j).B == Colors.AliceBlue.B)
-                    {
-                        canvasArray[i, j] = 0;
-                    }
-                    else
-                    {
-                        canvasArray[i, j] = 1;
-                    }
-                }
-            }
-
-            var Area=arrayFloodFill(canvasArray, (int)(e.GetPosition(MainDrawingCanvas).X), (int)(e.GetPosition(MainDrawingCanvas).Y),9999,9999);
-
-            MessageBox.Show("Selected contour area: " + ((double)Area / 1000000).ToString("N2") + "m^2 Utilization: " + ((double)Area / (MainDrawingCanvas.Width * MainDrawingCanvas.Height)).ToString("N2") + "%");
+            _mainViewModel.Scene.Area(MainDrawingCanvas, e);
         }
 
-        public Bitmap ExportToBitmap(string path, Canvas surface)
-        {
-
-            RenderTargetBitmap bmpRen = new RenderTargetBitmap((int)surface.Width, (int)surface.Height, 96, 96, PixelFormats.Pbgra32);
-            bmpRen.Render(surface);
-
-            MemoryStream stream = new MemoryStream();
-            BitmapEncoder encoder = new BmpBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bmpRen));
-            encoder.Save(stream);
-
-            Bitmap bitmap = new Bitmap(stream);
-            bitmap.Save(path);
-            return bitmap;
-        }
 
 
         //int BitmapFloodFill(Bitmap Bitmap, int startPositionX, int startPositionY, int endPositionX, int endPositionY, Byte colorToChange)
@@ -216,96 +183,5 @@ namespace ReverseKinematic
         //}
 
 
-        int arrayFloodFill(int[,] ConfigurationSpaceArray, int startPositionX, int startPositionY, int endPositionX, int endPositionY, int colorToChange = 0)
-        {
-
-
-            if (ConfigurationSpaceArray[startPositionX, startPositionY] != colorToChange)
-            {
-                return 0;
-            }
-
-            var toFill = new List<int[]>();
-
-            toFill.Add(new int[3] { startPositionX, startPositionY, 1 });
-            int maxValue = 0;
-            int testArea = 0;
-            while (toFill.Any())
-            {
-                var p = toFill[0];
-                toFill.RemoveAt(0);
-
-                ConfigurationSpaceArray[p[0], p[1]] = p[2];
-                maxValue = Math.Max(maxValue, p[2]);
-
-
-                //if ((p[0] + 1) < ConfigurationSpaceArray.GetLength(0))
-                //{
-                if ((ConfigurationSpaceArray[(p[0] + 1), (p[1])] == colorToChange) &&
-                    !toFill.Any(t => (t[0] == (p[0] + 1)) && (t[1] == (p[1]))))
-                {
-                    toFill.Add(new int[3] { (p[0] + 1), (p[1]), p[2] + 1 });
-                    testArea++;
-                }
-                //}
-
-                //if ((p[0] - 1) >= 0)
-                //{
-
-                if ((ConfigurationSpaceArray[(p[0] - 1), (p[1])] == colorToChange) &&
-                    !toFill.Any(t => (t[0] == (p[0] - 1)) && (t[1] == (p[1]))))
-                {
-                    toFill.Add(new int[3] { (p[0] - 1), (p[1]), p[2] + 1 });
-                    testArea++;
-                }
-                //if ((ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange) &&
-                //        !toFill.Any(t => (t[0] == (p[0] - 1)) && (t[1] == p[1])))
-                //    {
-                //        toFill.Add(new int[3] { p[0] - 1, p[1], p[2] + 1 });
-                //    }
-                //}
-
-                //if ((p[1] + 1) < ConfigurationSpaceArray.GetLength(1))
-                //{
-                if ((ConfigurationSpaceArray[(p[0]), (p[1] + 1)] == colorToChange) &&
-                    !toFill.Any(t => (t[0] == (p[0])) && (t[1] == (p[1] + 1))))
-                {
-                    toFill.Add(new int[3] { (p[0]), (p[1] + 1), p[2] + 1 });
-                    testArea++;
-                }
-
-                //if ((ConfigurationSpaceArray[p[0], p[1] + 1] == colorToChange) &&
-                //        !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] + 1))))
-                //    {
-                //        toFill.Add(new int[3] { p[0], p[1] + 1, p[2] + 1 });
-                //    }
-                //}
-
-                //if ((p[1] - 1) >= 0)
-                //{
-                if ((ConfigurationSpaceArray[(p[0]), (p[1] - 1)] == colorToChange) &&
-                    !toFill.Any(t => (t[0] == (p[0])) && (t[1] == (p[1] - 1))))
-                {
-                    toFill.Add(new int[3] { (p[0]), (p[1] - 1), p[2] + 1 });
-                    testArea++;
-                }
-
-                //if ((ConfigurationSpaceArray[p[0], p[1] - 1] == colorToChange) &&
-                //                            !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] - 1))))
-                //    {
-                //        toFill.Add(new int[3] { p[0], p[1] - 1, p[2] + 1 });
-                //    }
-                //}
-
-                // i++;
-                //if (p[0] == endPositionX && p[1] == endPositionY)
-                //{
-                //    break;
-                //}
-
-            }
-
-            return testArea;
-        }
     }
 }

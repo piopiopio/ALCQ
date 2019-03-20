@@ -1,7 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Security.RightsManagement;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using netDxf;
 
@@ -60,7 +67,7 @@ namespace ReverseKinematic
         {
             get
             {
-                return pieces*(MaterialCost + CuttingCost) * (1 + Markup / 100) + InitializationFee;
+                return pieces * (MaterialCost + CuttingCost) * (1 + Markup / 100) + InitializationFee;
             }
         }
         public double InitializationFee
@@ -82,7 +89,7 @@ namespace ReverseKinematic
         public double MaterialCost
         {
             get
-            {             
+            {
                 return RectangleArea * Material.GetOneMM2Price;
 
             }
@@ -98,7 +105,7 @@ namespace ReverseKinematic
         private Material material = new Material();
         public double RectangleArea
         {
-            get => Math.Abs((MaxXMaxY.X - MinXMinY.X) * (MaxXMaxY.Y - MinXMinY.Y));
+            get => Math.Abs((MaxXMaxY.X - MinXMinY.X) * (MaxXMaxY.Y - MinXMinY.Y)/1000000);
             set { }
         }
 
@@ -116,6 +123,144 @@ namespace ReverseKinematic
 
             MinXMinY.X = Math.Min(newPoint.X, MinXMinY.X);
             MinXMinY.Y = Math.Min(newPoint.Y, MinXMinY.Y);
+        }
+
+
+        public Bitmap ExportToBitmap(string path, Canvas surface)
+        {
+
+            RenderTargetBitmap bmpRen = new RenderTargetBitmap((int)surface.Width, (int)surface.Height, 96, 96,
+                PixelFormats.Pbgra32);
+            bmpRen.Render(surface);
+
+            MemoryStream stream = new MemoryStream();
+            BitmapEncoder encoder = new BmpBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmpRen));
+            encoder.Save(stream);
+
+            Bitmap bitmap = new Bitmap(stream);
+            bitmap.Save(path);
+            return bitmap;
+        }
+
+        public double Area(Canvas MainDrawingCanvas, MouseButtonEventArgs e)
+        {
+            var tempBitmap = ExportToBitmap("C:\\Users\\Piotr\\Desktop\\n1.png", MainDrawingCanvas);
+            int[,] canvasArray = new int[(int)MainDrawingCanvas.Width, (int)MainDrawingCanvas.Height];
+
+            for (int i = 0; i < tempBitmap.Width; i++)
+            {
+                for (int j = 0; j < tempBitmap.Height; j++)
+                {
+                    if (tempBitmap.GetPixel(i, j).B == Colors.AliceBlue.B)
+                    {
+                        canvasArray[i, j] = 0;
+                    }
+                    else
+                    {
+                        canvasArray[i, j] = 1;
+                    }
+                }
+            }
+
+            var Area = arrayFloodFill(canvasArray, (int)(e.GetPosition(MainDrawingCanvas).X), (int)(e.GetPosition(MainDrawingCanvas).Y), 9999, 9999);
+            Area += (int)Length;
+            Area -= ObjectList.Count();
+            MessageBox.Show("Selected contour area: " + ((double)Area / 1000000).ToString("N2") + "m^2 Utilization: " + (100*(double)Area / (MainDrawingCanvas.Width * MainDrawingCanvas.Height)).ToString("N0") + "%");
+            return Area;
+        }
+
+
+        int arrayFloodFill(int[,] ConfigurationSpaceArray, int startPositionX, int startPositionY, int endPositionX, int endPositionY, int colorToChange = 0)
+        {
+
+
+            if (ConfigurationSpaceArray[startPositionX, startPositionY] != colorToChange)
+            {
+                return 0;
+            }
+
+            var toFill = new List<int[]>();
+
+            toFill.Add(new int[3] { startPositionX, startPositionY, 1 });
+            int maxValue = 0;
+            int testArea = 0;
+            while (toFill.Any())
+            {
+                var p = toFill[0];
+                toFill.RemoveAt(0);
+
+                ConfigurationSpaceArray[p[0], p[1]] = p[2];
+                maxValue = Math.Max(maxValue, p[2]);
+
+
+                //if ((p[0] + 1) < ConfigurationSpaceArray.GetLength(0))
+                //{
+                if ((ConfigurationSpaceArray[(p[0] + 1), (p[1])] == colorToChange) &&
+                    !toFill.Any(t => (t[0] == (p[0] + 1)) && (t[1] == (p[1]))))
+                {
+                    toFill.Add(new int[3] { (p[0] + 1), (p[1]), p[2] + 1 });
+                    testArea++;
+                }
+                //}
+
+                //if ((p[0] - 1) >= 0)
+                //{
+
+                if ((ConfigurationSpaceArray[(p[0] - 1), (p[1])] == colorToChange) &&
+                    !toFill.Any(t => (t[0] == (p[0] - 1)) && (t[1] == (p[1]))))
+                {
+                    toFill.Add(new int[3] { (p[0] - 1), (p[1]), p[2] + 1 });
+                    testArea++;
+                }
+                //if ((ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange) &&
+                //        !toFill.Any(t => (t[0] == (p[0] - 1)) && (t[1] == p[1])))
+                //    {
+                //        toFill.Add(new int[3] { p[0] - 1, p[1], p[2] + 1 });
+                //    }
+                //}
+
+                //if ((p[1] + 1) < ConfigurationSpaceArray.GetLength(1))
+                //{
+                if ((ConfigurationSpaceArray[(p[0]), (p[1] + 1)] == colorToChange) &&
+                    !toFill.Any(t => (t[0] == (p[0])) && (t[1] == (p[1] + 1))))
+                {
+                    toFill.Add(new int[3] { (p[0]), (p[1] + 1), p[2] + 1 });
+                    testArea++;
+                }
+
+                //if ((ConfigurationSpaceArray[p[0], p[1] + 1] == colorToChange) &&
+                //        !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] + 1))))
+                //    {
+                //        toFill.Add(new int[3] { p[0], p[1] + 1, p[2] + 1 });
+                //    }
+                //}
+
+                //if ((p[1] - 1) >= 0)
+                //{
+                if ((ConfigurationSpaceArray[(p[0]), (p[1] - 1)] == colorToChange) &&
+                    !toFill.Any(t => (t[0] == (p[0])) && (t[1] == (p[1] - 1))))
+                {
+                    toFill.Add(new int[3] { (p[0]), (p[1] - 1), p[2] + 1 });
+                    testArea++;
+                }
+
+                //if ((ConfigurationSpaceArray[p[0], p[1] - 1] == colorToChange) &&
+                //                            !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] - 1))))
+                //    {
+                //        toFill.Add(new int[3] { p[0], p[1] - 1, p[2] + 1 });
+                //    }
+                //}
+
+                // i++;
+                //if (p[0] == endPositionX && p[1] == endPositionY)
+                //{
+                //    break;
+                //}
+
+            }
+
+            return testArea;
         }
 
 
@@ -160,10 +305,10 @@ namespace ReverseKinematic
 
             Recalculate();
         }
-
+        public List<Shape> ObjectList = new List<Shape>();
         public List<Shape> Calculate(DxfDocument loaded)
         {
-            var ObjectList = new List<Shape>();
+
 
             foreach (var item in loaded.Lines) ObjectList.Add(new Line(item));
 

@@ -62,7 +62,10 @@ namespace ReverseKinematic
             {
                 CheckIfNewPointExtendArea(item.MaxXMaxY);
                 CheckIfNewPointExtendArea(item.MinXMinY);
+                Length += item.Length;
             }
+            
+            
         }
 
         private netDxf.Entities.LwPolyline InputLwPolyline { get; }
