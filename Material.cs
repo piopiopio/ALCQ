@@ -9,9 +9,9 @@ namespace ReverseKinematic
     {
         public Material()
         {
-            MaterialList.Add(new Tuple<string, double, double>("Stainless steel", 30, 7.7));
-            MaterialList.Add(new Tuple<string, double, double>("Carbon steel", 3, 7.9));
-            MaterialList.Add(new Tuple<string, double, double>("Aluminum", 25, 2.7));
+            MaterialList.Add(new Tuple<string, double, double>("Stainless steel", 30, 7700));
+            MaterialList.Add(new Tuple<string, double, double>("Carbon steel", 3, 7900));
+            MaterialList.Add(new Tuple<string, double, double>("Aluminum", 25, 2700));
 
 
             MaterialThicknessList.Add(new Tuple<double, double>(0.5, 0.01));
@@ -65,7 +65,7 @@ namespace ReverseKinematic
 
 
                 //return 0.001 * SelectedThickness.Item2 * SelectedMaterial.Item3 * SelectedMaterial.Item2;
-                return 0.000001 * SelectedThickness.Item1 * SelectedMaterial.Item3 * SelectedMaterial.Item2;
+                return 0.001*0.001*0.001 * SelectedThickness.Item1 * SelectedMaterial.Item3 * SelectedMaterial.Item2;
 
             }
         }

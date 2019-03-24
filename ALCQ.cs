@@ -64,8 +64,6 @@ namespace ReverseKinematic
                 CheckIfNewPointExtendArea(item.MinXMinY);
                 Length += item.Length;
             }
-            
-            
         }
 
         private netDxf.Entities.LwPolyline InputLwPolyline { get; }
@@ -90,7 +88,7 @@ namespace ReverseKinematic
                 polygonLength += (InputSpline.ControlPoints[i + 1].Position - InputSpline.ControlPoints[i].Position)
                     .Modulus();
 
-            chordVariable = (int) (polygonLength * 10);
+            chordVariable = (int) (polygonLength * 20);
             var DotsList = inputSpline.PolygonalVertexes(chordVariable);
             MinXMinY = DotsList.First();
             MaxXMaxY = DotsList.First();
@@ -149,6 +147,8 @@ namespace ReverseKinematic
     {
         public Ellipse(netDxf.Entities.Ellipse inputEllipse)
         {
+            MaxXMaxY = new Vector3();
+            MinXMinY = new Vector3();
             InputEllipse = inputEllipse;
             var a = inputEllipse.MajorAxis / 2;
             var b = inputEllipse.MinorAxis / 2;
@@ -180,14 +180,23 @@ namespace ReverseKinematic
 
             tempEllipse.StrokeThickness = 1;
             tempEllipse.Stroke = Brushes.Black;
+
+
+            tempEllipse.SetValue(Canvas.LeftProperty, -ellipse.MajorAxis / 2 + ellipse.Center.X - startVector.X);
+            tempEllipse.SetValue(Canvas.TopProperty,
+                -ellipse.MinorAxis / 2 - ellipse.Center.Y + canvasHeight + startVector.Y);
+
             return tempEllipse;
         }
     }
+
 
     public class Circle : Shape
     {
         public Circle(netDxf.Entities.Circle inputCircle)
         {
+            MaxXMaxY = new Vector3();
+            MinXMinY = new Vector3();
             InputCircle = inputCircle;
             MinXMinY.X = inputCircle.Center.X - inputCircle.Radius;
             MinXMinY.Y = inputCircle.Center.Y - inputCircle.Radius;
@@ -265,6 +274,8 @@ namespace ReverseKinematic
                                          ) / 180) * inputArc.Radius + inputArc.Center.Y;
                     CheckIfNewPointExtendArea(new Vector3(tempX, tempY, 0));
                 }
+
+            MinXMinY.Y -= 1;
         }
 
         public netDxf.Entities.Arc InputArc { get; set; }
@@ -365,7 +376,6 @@ namespace ReverseKinematic
         }
 
         public netDxf.Entities.Line InputLine { get; set; }
-
 
         public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
         {

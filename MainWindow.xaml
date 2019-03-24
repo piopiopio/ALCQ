@@ -107,7 +107,7 @@
 
             <Label Grid.Column="0" Grid.Row="12" Content="{Binding Scene.TotalPrice}"
                    ContentStringFormat="Total price: {0:f2}zł" FontWeight="Bold"/>
-            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="13" Content="Click loaded into shape interior to calculate utilization" VerticalAlignment="Bottom" BorderBrush="Black" BorderThickness="1"></Label>
+            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="13" Content="Click into closed shape interior to calculate utilization" VerticalAlignment="Bottom" BorderBrush="Black" BorderThickness="1"></Label>
 
         </Grid>
 
