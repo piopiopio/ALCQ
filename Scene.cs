@@ -142,15 +142,21 @@ namespace ReverseKinematic
             {
                 MessageBox.Show("Click outside closed boundary. Try again.");
                 Area = 0;
+                return Area;
             }
 
-
+            if (Area == 0)
+            {
+                MessageBox.Show("Click outside closed boundary. Try again.");
+                return Area;
+            }
 
             Area += (int) Length;
             Area -= ObjectList.Count();
             MessageBox.Show("Selected contour area: " + ((double) Area / 1000000).ToString("N2") + "m^2 Utilization: " +
                             (100 * (double) Area / (MainDrawingCanvas.Width * MainDrawingCanvas.Height))
                             .ToString("N0") + "%");
+
             return Area;
         }
 
