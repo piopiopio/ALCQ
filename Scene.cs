@@ -15,8 +15,8 @@ namespace ReverseKinematic
 {
     public class Scene : ViewModelBase
     {
-        private double markup;
         private readonly Material material = new Material();
+        private double markup;
 
         public Vector3 MaxXMaxY;
         public Vector3 MinXMinY;
@@ -104,7 +104,7 @@ namespace ReverseKinematic
         }
 
 
-        public Bitmap ExportToBitmap(string path, Canvas surface)
+        public Bitmap ExportToBitmap(Canvas surface)
         {
             var bmpRen = new RenderTargetBitmap((int) surface.Width, (int) surface.Height, 96, 96,
                 PixelFormats.Pbgra32);
@@ -116,13 +116,13 @@ namespace ReverseKinematic
             encoder.Save(stream);
 
             var bitmap = new Bitmap(stream);
-            bitmap.Save(path);
             return bitmap;
         }
 
         public double Area(Canvas MainDrawingCanvas, MouseButtonEventArgs e)
         {
-            var tempBitmap = ExportToBitmap("C:\\Users\\Piotr\\Desktop\\n1.png", MainDrawingCanvas);
+            var tempBitmap = ExportToBitmap(MainDrawingCanvas);
+
             var canvasArray = new int[(int) MainDrawingCanvas.Width, (int) MainDrawingCanvas.Height];
 
             for (var i = 0; i < tempBitmap.Width; i++)
@@ -132,11 +132,11 @@ namespace ReverseKinematic
                 else
                     canvasArray[i, j] = 1;
 
-            int Area=0;
+            var Area = 0;
             try
             {
-                Area = arrayFloodFill(canvasArray, (int)e.GetPosition(MainDrawingCanvas).X,
-                    (int)e.GetPosition(MainDrawingCanvas).Y, 9999, 9999);
+                Area = arrayFloodFill(canvasArray, (int) e.GetPosition(MainDrawingCanvas).X,
+                    (int) e.GetPosition(MainDrawingCanvas).Y, 9999, 9999);
             }
             catch (Exception exception)
             {
@@ -179,19 +179,12 @@ namespace ReverseKinematic
                 ConfigurationSpaceArray[p[0], p[1]] = p[2];
                 maxValue = Math.Max(maxValue, p[2]);
 
-
-                //if ((p[0] + 1) < ConfigurationSpaceArray.GetLength(0))
-                //{
                 if (ConfigurationSpaceArray[p[0] + 1, p[1]] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] + 1 && t[1] == p[1]))
                 {
                     toFill.Add(new int[3] {p[0] + 1, p[1], p[2] + 1});
                     testArea++;
                 }
-                //}
-
-                //if ((p[0] - 1) >= 0)
-                //{
 
                 if (ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] - 1 && t[1] == p[1]))
@@ -199,15 +192,7 @@ namespace ReverseKinematic
                     toFill.Add(new int[3] {p[0] - 1, p[1], p[2] + 1});
                     testArea++;
                 }
-                //if ((ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange) &&
-                //        !toFill.Any(t => (t[0] == (p[0] - 1)) && (t[1] == p[1])))
-                //    {
-                //        toFill.Add(new int[3] { p[0] - 1, p[1], p[2] + 1 });
-                //    }
-                //}
 
-                //if ((p[1] + 1) < ConfigurationSpaceArray.GetLength(1))
-                //{
                 if (ConfigurationSpaceArray[p[0], p[1] + 1] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] && t[1] == p[1] + 1))
                 {
@@ -215,34 +200,13 @@ namespace ReverseKinematic
                     testArea++;
                 }
 
-                //if ((ConfigurationSpaceArray[p[0], p[1] + 1] == colorToChange) &&
-                //        !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] + 1))))
-                //    {
-                //        toFill.Add(new int[3] { p[0], p[1] + 1, p[2] + 1 });
-                //    }
-                //}
 
-                //if ((p[1] - 1) >= 0)
-                //{
                 if (ConfigurationSpaceArray[p[0], p[1] - 1] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] && t[1] == p[1] - 1))
                 {
                     toFill.Add(new int[3] {p[0], p[1] - 1, p[2] + 1});
                     testArea++;
                 }
-
-                //if ((ConfigurationSpaceArray[p[0], p[1] - 1] == colorToChange) &&
-                //                            !toFill.Any(t => (t[0] == p[0]) && (t[1] == (p[1] - 1))))
-                //    {
-                //        toFill.Add(new int[3] { p[0], p[1] - 1, p[2] + 1 });
-                //    }
-                //}
-
-                // i++;
-                //if (p[0] == endPositionX && p[1] == endPositionY)
-                //{
-                //    break;
-                //}
             }
 
             return testArea;
@@ -257,32 +221,12 @@ namespace ReverseKinematic
             MaxXMaxY = Vector3.NaN;
             ObjectList = new List<Shape>();
 
-            // mainDrawingCanvas.Children.Clear();
-
             var openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Text files (*.dxf)|*.dxf";
             if (openFileDialog.ShowDialog() == false) return;
 
-
-            // your dxf file name
-            // string file = "sample1.dxf";
             var file = openFileDialog.FileName;
 
-            //// by default it will create an AutoCad2000 DXF version
-            //DxfDocument dxf = new DxfDocument();
-            //// an entity
-            //netDxf.Entities.Line entity = new netDxf.Entities.Line(new Vector2(5, 5), new Vector2(10, 5));
-            //// add your entities here
-            //dxf.AddEntity(entity);
-            //// save to file
-            //dxf.Save(file);
-
-            //bool isBinary;
-            //// this check is optional but recommended before loading a DXF file
-            //DxfVersion dxfVersion = DxfDocument.CheckDxfFileVersion(file, out isBinary);
-            //// netDxf is only compatible with AutoCad2000 and higher DXF version
-            //if (dxfVersion < DxfVersion.AutoCad2000) return;
-            //// load file
 
             var loaded = DxfDocument.Load(file);
 

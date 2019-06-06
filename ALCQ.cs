@@ -47,10 +47,6 @@ namespace ReverseKinematic
         {
             InputLwPolyline = inputLwPolyline;
 
-            //for (int i = 1; i < InputLwPolyline.Vertexes.Count; i++)
-            //{
-            //    LinesOrArcsCollection.Add(new Line(InputLwPolyline.Vertexes[i - 1], InputLwPolyline.Vertexes[i]));
-            //}
             var temp = InputLwPolyline.Explode();
             foreach (var item in temp)
                 if (item.GetType() == typeof(netDxf.Entities.Line))
@@ -134,7 +130,6 @@ namespace ReverseKinematic
             };
 
 
-            //return path;
             var temp = new Polyline();
             temp.Stroke = Brushes.Black;
             temp.StrokeThickness = 1;

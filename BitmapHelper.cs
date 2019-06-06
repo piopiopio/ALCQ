@@ -4,18 +4,17 @@ using System.Windows.Media.Imaging;
 
 namespace ReverseKinematic
 {
-
-
     public class BitmapHelper
     {
-        // The bitmap's size.
-        private int Width, Height;
-
         // The pixel array.
-        private byte[] Pixels;
+        private readonly byte[] Pixels;
 
         // The number of bytes per row.
-        private int Stride;
+        private readonly int Stride;
+
+        // The bitmap's size.
+        private readonly int Width;
+        private readonly int Height;
 
         // Constructor. Width and height required.
         public BitmapHelper(int width, int height)
@@ -35,18 +34,19 @@ namespace ReverseKinematic
         public void GetPixel(int x, int y, out byte red,
             out byte green, out byte blue, out byte alpha)
         {
-            int index = y * Stride + x * 4;
+            var index = y * Stride + x * 4;
             blue = Pixels[index++];
             green = Pixels[index++];
             red = Pixels[index++];
             alpha = Pixels[index];
         }
+
         // Set all pixels to a specific color.
         public void SetColor(byte red, byte green, byte blue,
             byte alpha)
         {
-            int num_bytes = Width * Height * 4;
-            int index = 0;
+            var num_bytes = Width * Height * 4;
+            var index = 0;
             while (index < num_bytes)
             {
                 Pixels[index++] = blue;
@@ -79,25 +79,22 @@ namespace ReverseKinematic
             Pixels[y * Stride + x * 4 + 1] = green;
             Pixels[y * Stride + x * 4 + 1] = green;
             Pixels[y * Stride + x * 4 + 0] = blue;
-
         }
 
         public WriteableBitmap MakeBitmap(double dpiX, double dpiY)
         {
             // Create the WriteableBitmap.
-            WriteableBitmap wbitmap = new WriteableBitmap(
+            var wbitmap = new WriteableBitmap(
                 Width, Height, dpiX, dpiY,
                 //PixelFormats.Bgra32, null);
                 PixelFormats.Bgra32, null);
 
             // Load the pixel data.
-            Int32Rect rect = new Int32Rect(0, 0, Width, Height);
+            var rect = new Int32Rect(0, 0, Width, Height);
             wbitmap.WritePixels(rect, Pixels, Stride, 0);
 
             // Return the bitmap.
             return wbitmap;
         }
-
-
     }
 }

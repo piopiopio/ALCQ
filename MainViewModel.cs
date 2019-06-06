@@ -2,22 +2,27 @@
 {
     public class MainViewModel : ViewModelBase
     {
+        internal void Render()
+        {
+        }
+
         #region Private fields
+
         private string _text;
         private Scene _scene;
+
         #endregion Private fields
 
         #region Public Properties
+
         public MainViewModel()
         {
-
-
             Scene = new Scene();
         }
 
         public Scene Scene
         {
-            get { return _scene; }
+            get => _scene;
             set
             {
                 _scene = value;
@@ -26,26 +31,17 @@
         }
 
 
-
         public string Text
         {
-
-            get
-            {
-                return _text;
-            }
+            get => _text;
             set
             {
                 _text = value;
                 OnPropertyChanged("Text");
             }
         }
-        #endregion Public Properties
 
-        internal void Render()
-        {
-            // _scene.Render();
-        }
+        #endregion Public Properties
 
         #region Private Methods
 
