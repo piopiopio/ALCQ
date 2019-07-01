@@ -1,0 +1,74 @@
+﻿<Window x:Class="ReverseKinematic.CameraView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReverseKinematic"
+        mc:Ignorable="d"
+        Title="CameraView" Height="500" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Canvas Name="MouseCameraCanvas"  Grid.Row="0" Grid.Column="0">
+            <ItemsControl ItemsSource="{Binding Scene.ObstaclesCollection}" >
+                <ItemsControl.ItemContainerStyle >
+                    <Style TargetType="ContentPresenter">
+
+                        <Setter Property="Canvas.Left" Value ="{Binding From.X}"/>
+                        <Setter Property="Canvas.Top" Value ="{Binding From.Y}"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+
+
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle Width="{Binding Size.X}" Height="{Binding Size.Y}" Fill="{Binding Color}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+
+        <Grid Row="0" Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Column="0" Grid.Row="0" Name="RedColorValueText" Content="Red: "></Label>
+            <Label Grid.Column="1" Grid.Row="0" Name="RedColorValue" Content="0"></Label>
+            <Label Grid.Column="0" Grid.Row="1" Name="GreenColorValueText" Content="Green: "></Label>
+            <Label Grid.Column="1" Grid.Row="1" Name="GreenColorValue" Content="0"  ></Label>
+            <Label Grid.Column="0" Grid.Row="2" Name="BlueColorValueText" Content="Blue: "></Label>
+            <Label Grid.Column="1" Grid.Row="2" Name="BlueColorValue" Content="0"  ></Label>
+            <Label Grid.Column="0" Grid.Row="3" Name="WhiteColorValueText" Content="White: "></Label>
+            <Label Grid.Column="1" Grid.Row="3" Name="WhiteColorValue" Content="0"  ></Label>            
+            
+            
+            <Label Grid.Column="0" Grid.Row="4" Name="RedStandardDeviationText" Content="Red standard deviation: "></Label>
+            <Label Grid.Column="1" Grid.Row="4" Name="RedStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
+            <Label Grid.Column="0" Grid.Row="5" Name="GreenStandardDeviationText" Content="Green standard deviation: "></Label>
+            <Label Grid.Column="1" Grid.Row="5" Name="GreenStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
+            <Label Grid.Column="0" Grid.Row="6" Name="BlueStandardDeviationText" Content="Blue standard deviation: "></Label>
+            <Label Grid.Column="1" Grid.Row="6" Name="BlueStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
+            <Label Grid.Column="0" Grid.Row="7" Name="WhiteStandardDeviationText" Content="White standard deviation: "></Label>
+            <Label Grid.Column="1" Grid.Row="7" Name="WhiteStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
+        </Grid>
+    </Grid>
+</Window>

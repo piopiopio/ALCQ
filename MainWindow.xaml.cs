@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using WindowsInput;
+using WindowsInput.Native;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Drawing.Color;
 using Size = System.Windows.Size;
@@ -19,8 +23,9 @@ namespace ReverseKinematic
     /// </summary>
     public partial class MainWindow : Window
     {
+        private string drawingsPath = "C:\\SearchToolAllDrawings";
         private readonly MainViewModel _mainViewModel = new MainViewModel();
-
+        InputSimulator inputSimulator=new InputSimulator();
         private readonly double zoomMax = 50;
         private readonly double zoomMin = 0.5;
         private readonly double zoomSpeed = 0.001;
@@ -34,12 +39,44 @@ namespace ReverseKinematic
 
             DataContext = _mainViewModel;
 
+            pdfWebViewer.Navigate(new Uri("about:blank"));
+           // pdfWebViewer.Navigate(new Uri("C:\\Users\\Piotr\\Desktop\\Part1.pdf"));
 
+
+
+          //  BackgroundFocus(MainDockPanel);
 
 
         }
 
+        //public void BackgroundFocus(UIElement el)
+        //{
+            
+        //    Action a = () => el.Focus();
+        //    Action b = () => test();
+ 
+            
+        //    el.Dispatcher.BeginInvoke(DispatcherPriority.Background, a);
+        //    el.Dispatcher.BeginInvoke(DispatcherPriority.Background, b);
 
+        //    //DispatcherTimer dispatcherTimer = new DispatcherTimer();
+        //    //dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+        //    //dispatcherTimer.Interval = new TimeSpan(0, 0, 5);
+        //    //dispatcherTimer.Start();
+
+        //}
+
+        //private void dispatcherTimer_Tick(object sender, EventArgs e)
+        //{
+        // test();
+        //}
+        //public void test()
+        //{
+        //    InputSimulator InputSimulator = new InputSimulator();
+        //    InputSimulator.Mouse.MoveMouseTo(1500,30000);
+        //    InputSimulator.Mouse.LeftButtonClick();
+        //    InputSimulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
+        //}
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
 
@@ -183,5 +220,28 @@ namespace ReverseKinematic
         //}
 
 
+        private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            while ((dep != null) && !(dep is ListViewItem))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+                return;
+
+            _mainViewModel.Scene.CurrentPart = (Part)MyListView.ItemContainerGenerator.ItemFromContainer(dep);
+
+            //MessageBox.Show(item.Name);
+            pdfWebViewer.Navigate(new Uri(drawingsPath +"/" + _mainViewModel.Scene.CurrentPart.fullName+".pdf"));
+
+        }
+
+        private void SearchPartButton_OnClick(object sender, RoutedEventArgs e)
+        {
+           _mainViewModel.Scene.Sort();
+        }
     }
 }

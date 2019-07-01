@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,8 +9,12 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using netDxf;
 using netDxf.Entities;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
+using FontStyle = netDxf.Tables.FontStyle;
 using Point = System.Windows.Point;
 using Polyline = System.Windows.Shapes.Polyline;
+using Size = System.Windows.Size;
 
 namespace ReverseKinematic
 {
@@ -38,6 +44,7 @@ namespace ReverseKinematic
             MinXMinY.Y = Math.Min(newPoint.Y, MinXMinY.Y);
         }
     }
+
 
     public class LwPolyline : Shape
     {
@@ -140,6 +147,36 @@ namespace ReverseKinematic
             temp.StrokeThickness = 1;
             temp.Points = transformedControlPointsList;
             return temp;
+        }
+    }
+
+    public class Dimension : Shape
+    {
+        private TextBlock textBlock = new TextBlock();
+        private netDxf.Entities.Dimension inputDimension;
+        public Dimension(netDxf.Entities.Dimension inputDimension)
+        {
+            this.inputDimension = inputDimension;
+            textBlock.Text = inputDimension.Measurement.ToString("N2");
+            textBlock.Text = inputDimension.Measurement.ToString("0.##");
+            //textBlock.Text = "AAA";
+            // MinXMinY = new Vector3(inputDimension.TextReferencePoint.X, inputDimension.TextReferencePoint.Y, 0);
+            MinXMinY = new Vector3(inputDimension.TextReferencePoint.X, inputDimension.TextReferencePoint.Y, 0);
+           MaxXMaxY= new Vector3(inputDimension.TextReferencePoint.X, inputDimension.TextReferencePoint.Y, 0);
+            textBlock.Foreground = new SolidColorBrush(Colors.Black);
+            textBlock.FontSize = 4;
+
+        }
+
+        public override void Draw(Canvas canvas, Vector3 startVector, double lineWidth = 1)
+        {
+            System.Windows.Media.FormattedText text=new FormattedText(
+                inputDimension.Measurement.ToString("N0"), CultureInfo.CurrentCulture, FlowDirection.LeftToRight,new Typeface(textBlock.FontFamily, textBlock.FontStyle, textBlock.FontWeight, FontStretches.Normal), textBlock.FontSize,System.Windows.Media.Brushes.Black);
+            Canvas.SetLeft(textBlock, inputDimension.TextReferencePoint.X- startVector.X-text.Width/2);
+
+            Canvas.SetTop(textBlock, -inputDimension.TextReferencePoint.Y + startVector.Y+canvas.Height);
+
+            canvas.Children.Add(textBlock);
         }
     }
 
@@ -341,6 +378,7 @@ namespace ReverseKinematic
 
     public class Line : Shape
     {
+
         public Line(netDxf.Entities.Line inputLine)
         {
             InputLine = inputLine;
@@ -356,6 +394,24 @@ namespace ReverseKinematic
 
             MinXMinY = tempMin;
             MaxXMaxY = tempMax;
+        }
+
+        public Line(double x1, double y1, double x2,double y2)
+        {
+            
+            Length = Math.Sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+            var tempMin = new Vector3();
+            var tempMax = new Vector3();
+
+            tempMin.X = Math.Min(x1, x2);
+            tempMax.X = Math.Max(x1, x2);
+
+            tempMin.Y = Math.Min(y1,y2);
+            tempMax.Y = Math.Max(y1,y2);
+            InputLine = new netDxf.Entities.Line(tempMin, tempMax);
+            MinXMinY = tempMin;
+            MaxXMaxY = tempMax;
+
         }
 
         public Line(LwPolylineVertex vertex1, LwPolylineVertex vertex2)

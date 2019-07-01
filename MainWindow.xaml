@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:reverseKinematic="clr-namespace:ReverseKinematic"
         mc:Ignorable="d"
         Title="Automatic laser cut quotation" Name="MainWindow1" WindowState="Maximized"
         SizeChanged="MainWindow_OnSizeChanged" MinWidth="900" d:DesignHeight="917.5"
@@ -44,23 +45,26 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
   
             </Grid.RowDefinitions>
 
 
-            <Button Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Content="Load file" Name="LoadFile" Height="20"
-                    VerticalAlignment="Top" Click="LoadFile_OnClick" />
+            <!--<Button Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Content="Add new files" Name="LoadFile" Height="20"
+                    VerticalAlignment="Top" Click="LoadFile_OnClick" />-->
 
-            <Label Grid.Column="0" Grid.Row="1" Content="Markup %" />
-            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.Markup}" />
+            <Label Grid.Column="0" Grid.Row="1" Content="Part mass:" />
+            <!--<TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.Mass}" />-->
+            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.SerialData.MassGrams}" />
 
 
             <Label Grid.Column="0" Grid.Row="2" Content="Quantity: " />
             <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Scene.Pieces}" />
 
 
-            <Label Grid.Column="0" Grid.Row="3" Content="Material:" />
+            <Label Grid.Column="0" Grid.Row="3" Content="Material:" HorizontalAlignment="Left" Width="487" />
             <ComboBox Grid.Column="1" Grid.Row="3" Name="MaterialSelector"
                       ItemsSource="{Binding Scene.Material.MaterialList}"
                       SelectedItem="{Binding Scene.Material.SelectedMaterial}" SelectedIndex="0">
@@ -71,7 +75,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Label Grid.Column="0" Grid.Row="4" Content="Thickness:" />
+            <!--<Label Grid.Column="0" Grid.Row="4" Content="Thickness:" />
             <ComboBox Grid.Column="1" Grid.Row="4" Name="ThicknessSelector"
                       ItemsSource="{Binding Scene.Material.MaterialThicknessList}"
                       SelectedItem="{Binding Scene.Material.SelectedThickness}" SelectedIndex="0">
@@ -80,23 +84,23 @@
                         <Label Content="{Binding Item1}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
-            </ComboBox>
+            </ComboBox>-->
 
-            <Label Grid.Row="5" Grid.Column="0" Content="{Binding Scene.Length}" ContentStringFormat="Length: {0:f2}mm" />
+            <!--<Label Grid.Row="5" Grid.Column="0" Content="{Binding Scene.Length}" ContentStringFormat="Length: {0:f2}mm" />
 
 
             <Label Grid.Row="6" Grid.Column="0" Content="{Binding Scene.RectangleArea}"
-                   ContentStringFormat="Sheet area: {0:f2}m² " />
+                   ContentStringFormat="Sheet area: {0:f2}m² " />-->
 
 
 
-            <Label Grid.Row="7" Grid.Column="0" Content="{Binding ActualWidth, ElementName=MainDrawingCanvas}" ContentStringFormat="X dimension: {0:f2}mm"/>
+            <!--<Label Grid.Row="7" Grid.Column="0" Content="{Binding ActualWidth, ElementName=MainDrawingCanvas}" ContentStringFormat="X dimension: {0:f2}mm"/>
 
-            <Label Grid.Row="8" Grid.Column="0" Content="{Binding ActualHeight, ElementName=MainDrawingCanvas}" ContentStringFormat="Y dimension: {0:f2}mm"/>
+            <Label Grid.Row="8" Grid.Column="0" Content="{Binding ActualHeight, ElementName=MainDrawingCanvas}" ContentStringFormat="Y dimension: {0:f2}mm"/>-->
 
 
 
-            <Label Grid.Column="0" Grid.Row="9" Name="MaterialCost" Content="{Binding Scene.MaterialCost}"
+            <!--<Label Grid.Column="0" Grid.Row="9" Name="MaterialCost" Content="{Binding Scene.MaterialCost}"
                    ContentStringFormat="Material cost: {0:f2}zł" />
             <Label Grid.Column="0" Grid.Row="10" Content="{Binding Scene.CuttingCost}"
                    ContentStringFormat="Cutting cost: {0:f2}zł" />
@@ -106,15 +110,75 @@
                    ContentStringFormat="Initialization fee: {0:f2}zł" />
 
             <Label Grid.Column="0" Grid.Row="12" Content="{Binding Scene.TotalPrice}"
-                   ContentStringFormat="Total price: {0:f2}zł" FontWeight="Bold"/>
-            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="13" Content="Click into closed shape interior to calculate utilization" VerticalAlignment="Bottom" BorderBrush="Black" BorderThickness="1"></Label>
+                   ContentStringFormat="Total price: {0:f2}zł" FontWeight="Bold"/>-->
+            <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Search part" Name="SearchPartButton" Click="SearchPartButton_OnClick"></Button>
+            <ListView Name="MyListView" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" ItemsSource="{Binding Scene.PartsList}" PreviewMouseDown="ListViewItem_PreviewMouseLeftButtonDown">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
+                        <!--<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />-->
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View >
+                    <GridView  >
+                        <GridViewColumn Header="Name" Width="120" DisplayMemberBinding="{Binding Name, StringFormat=F2}"/>
+                        <GridViewColumn Header="Material" Width="90" DisplayMemberBinding="{Binding Material}"/>
+                        <GridViewColumn Header="Surface" Width="120" DisplayMemberBinding="{Binding Surface}"/>
+                        <GridViewColumn Header="Mass[g]" Width="120" DisplayMemberBinding="{Binding Mass, StringFormat=F2}"/>
+                        <GridViewColumn Header="IsSelected" Width="90" DisplayMemberBinding="{Binding IsSelected}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <Label Grid.Row="6" Content="Element in order additional info:"></Label>
+            <ListView Name="MyListView2" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7" ItemsSource="{Binding Scene.CurrentPart.OrderList}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
+                        <!--<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />-->
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View >
+                    <GridView  >
+                        <GridViewColumn Header="Order number" Width="120" DisplayMemberBinding="{Binding Number, StringFormat=F2}"/>
+                        <GridViewColumn Header="Date" Width="90" DisplayMemberBinding="{Binding Date, StringFormat=F2}"/>
+                        <GridViewColumn Header="Quantity" Width="90" DisplayMemberBinding="{Binding Quantity, StringFormat=F2}"/>
+                        <GridViewColumn Header="Supplier" Width="120" DisplayMemberBinding="{Binding Supplier}"/>
+                        <GridViewColumn Header="Purchaser" Width="120" DisplayMemberBinding="{Binding Purchaser}"/>
+                        <!--<GridViewColumn Header="Status" Width="120" DisplayMemberBinding="{Binding Status}"/>-->
+                        <!--<GridViewColumn Header="Status" Width="120" >
+                            <ComboBox  Grid.Row="8" ItemsSource="{Binding Source={reverseKinematic:Enumeration {x:Type reverseKinematic:Status}}}" DisplayMemberPath="Description" SelectedValue="{Binding Status}"  SelectedValuePath="Value"  />
+                        </GridViewColumn>-->
+                        <GridViewColumn Header="StatusEnumType" Width="240">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<TextBox Text="{Binding Purchaser}"></TextBox>-->
+                                    <ComboBox  Grid.Row="8" ItemsSource="{Binding Source={reverseKinematic:Enumeration {x:Type reverseKinematic:StatusEnumType}}}" DisplayMemberPath="Description" SelectedValue="{Binding Status1}"  SelectedValuePath="Value"  />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <!--<ComboBox Grid.Column="1" Grid.Row="8" Name="Status"
+                      ItemsSource="{Binding Scene.enumStatus}"
+                      SelectedItem="{Binding Scene.Status}" SelectedIndex="0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Status}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>-->
+
+<!--<Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="15" Content="Click into closed shape interior to calculate utilization" VerticalAlignment="Bottom" BorderBrush="Black" BorderThickness="1"></Label>-->
 
         </Grid>
 
         <DockPanel Name="MainDockPanel" Grid.Column="0" Grid.Row="0" Background="White">
 
-
-            <Viewbox Name="MainViewbox" Margin="10,10,10,10" >
+            <WebBrowser x:Name="pdfWebViewer"></WebBrowser>
+            <Viewbox Name="MainViewbox" Margin="10,10,10,10" Visibility="Hidden">
 
                 <!--<Grid>-->
 

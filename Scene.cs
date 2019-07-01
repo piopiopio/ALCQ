@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -10,11 +12,25 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using netDxf;
+using netDxf.Entities;
 
 namespace ReverseKinematic
 {
+
+
     public class Scene : ViewModelBase
     {
+        private double mass = 0;
+
+        public double Mass
+        {
+            get => mass;
+            set
+            {
+                mass = value;
+                OnPropertyChanged("Mass");
+            }
+        }
         private double markup;
         private readonly Material material = new Material();
 
@@ -23,13 +39,57 @@ namespace ReverseKinematic
         public List<Shape> ObjectList = new List<Shape>();
 
         private double pieces;
+        public ObservableCollection<Part> partsList = new ObservableCollection<Part>();
+
+        public ObservableCollection<Part> PartsList
+        {
+            get { return partsList; }
+            set { partsList = value; }
+        }
+
+        private Part currentPart;
+        public Part CurrentPart
+        {
+            get { return currentPart; }
+            set
+            {
+                currentPart = value;
+                OnPropertyChanged(nameof(CurrentPart));
+            }
+        }
+
+        private StatusEnumType _statusEnumType = StatusEnumType.Manufacturing;
+        public StatusEnumType CurrentStatusEnumType
+        {
+
+            get { return _statusEnumType; }
+            set
+            {
+                _statusEnumType = value;
+            }
+        }
+
+       
+
 
         public Scene()
         {
+
+
+
+            var files = Directory.GetFiles("C:\\SearchToolAllDrawings", "*.pdf", SearchOption.AllDirectories);
+
+            foreach (var item in files)
+            {
+                partsList.Add(new Part(Path.GetFileNameWithoutExtension(item)));
+            }
+
             material.ThresholdReached += Recalculate;
             markup = 5;
             pieces = 1;
         }
+
+
 
         public double Markup
         {
@@ -106,7 +166,7 @@ namespace ReverseKinematic
 
         public Bitmap ExportToBitmap(string path, Canvas surface)
         {
-            var bmpRen = new RenderTargetBitmap((int) surface.Width, (int) surface.Height, 96, 96,
+            var bmpRen = new RenderTargetBitmap((int)surface.Width, (int)surface.Height, 96, 96,
                 PixelFormats.Pbgra32);
             bmpRen.Render(surface);
 
@@ -123,16 +183,16 @@ namespace ReverseKinematic
         public double Area(Canvas MainDrawingCanvas, MouseButtonEventArgs e)
         {
             var tempBitmap = ExportToBitmap("C:\\Users\\Piotr\\Desktop\\n1.png", MainDrawingCanvas);
-            var canvasArray = new int[(int) MainDrawingCanvas.Width, (int) MainDrawingCanvas.Height];
+            var canvasArray = new int[(int)MainDrawingCanvas.Width, (int)MainDrawingCanvas.Height];
 
             for (var i = 0; i < tempBitmap.Width; i++)
-            for (var j = 0; j < tempBitmap.Height; j++)
-                if (tempBitmap.GetPixel(i, j).B == Colors.AliceBlue.B)
-                    canvasArray[i, j] = 0;
-                else
-                    canvasArray[i, j] = 1;
+                for (var j = 0; j < tempBitmap.Height; j++)
+                    if (tempBitmap.GetPixel(i, j).B == Colors.AliceBlue.B)
+                        canvasArray[i, j] = 0;
+                    else
+                        canvasArray[i, j] = 1;
 
-            int Area=0;
+            int Area = 0;
             try
             {
                 Area = arrayFloodFill(canvasArray, (int)e.GetPosition(MainDrawingCanvas).X,
@@ -151,10 +211,10 @@ namespace ReverseKinematic
                 return Area;
             }
 
-            Area += (int) Length;
+            Area += (int)Length;
             Area -= ObjectList.Count();
-            MessageBox.Show("Selected contour area: " + ((double) Area / 1000000).ToString("N2") + "m^2 Utilization: " +
-                            (100 * (double) Area / (MainDrawingCanvas.Width * MainDrawingCanvas.Height))
+            MessageBox.Show("Selected contour area: " + ((double)Area / 1000000).ToString("N2") + "m^2 Utilization: " +
+                            (100 * (double)Area / (MainDrawingCanvas.Width * MainDrawingCanvas.Height))
                             .ToString("N0") + "%");
 
             return Area;
@@ -168,7 +228,7 @@ namespace ReverseKinematic
 
             var toFill = new List<int[]>();
 
-            toFill.Add(new int[3] {startPositionX, startPositionY, 1});
+            toFill.Add(new int[3] { startPositionX, startPositionY, 1 });
             var maxValue = 0;
             var testArea = 0;
             while (toFill.Any())
@@ -185,7 +245,7 @@ namespace ReverseKinematic
                 if (ConfigurationSpaceArray[p[0] + 1, p[1]] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] + 1 && t[1] == p[1]))
                 {
-                    toFill.Add(new int[3] {p[0] + 1, p[1], p[2] + 1});
+                    toFill.Add(new int[3] { p[0] + 1, p[1], p[2] + 1 });
                     testArea++;
                 }
                 //}
@@ -196,7 +256,7 @@ namespace ReverseKinematic
                 if (ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] - 1 && t[1] == p[1]))
                 {
-                    toFill.Add(new int[3] {p[0] - 1, p[1], p[2] + 1});
+                    toFill.Add(new int[3] { p[0] - 1, p[1], p[2] + 1 });
                     testArea++;
                 }
                 //if ((ConfigurationSpaceArray[p[0] - 1, p[1]] == colorToChange) &&
@@ -211,7 +271,7 @@ namespace ReverseKinematic
                 if (ConfigurationSpaceArray[p[0], p[1] + 1] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] && t[1] == p[1] + 1))
                 {
-                    toFill.Add(new int[3] {p[0], p[1] + 1, p[2] + 1});
+                    toFill.Add(new int[3] { p[0], p[1] + 1, p[2] + 1 });
                     testArea++;
                 }
 
@@ -227,7 +287,7 @@ namespace ReverseKinematic
                 if (ConfigurationSpaceArray[p[0], p[1] - 1] == colorToChange &&
                     !toFill.Any(t => t[0] == p[0] && t[1] == p[1] - 1))
                 {
-                    toFill.Add(new int[3] {p[0], p[1] - 1, p[2] + 1});
+                    toFill.Add(new int[3] { p[0], p[1] - 1, p[2] + 1 });
                     testArea++;
                 }
 
@@ -257,35 +317,11 @@ namespace ReverseKinematic
             MaxXMaxY = Vector3.NaN;
             ObjectList = new List<Shape>();
 
-            // mainDrawingCanvas.Children.Clear();
-
             var openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Text files (*.dxf)|*.dxf";
             if (openFileDialog.ShowDialog() == false) return;
-
-
-            // your dxf file name
-            // string file = "sample1.dxf";
             var file = openFileDialog.FileName;
-
-            //// by default it will create an AutoCad2000 DXF version
-            //DxfDocument dxf = new DxfDocument();
-            //// an entity
-            //netDxf.Entities.Line entity = new netDxf.Entities.Line(new Vector2(5, 5), new Vector2(10, 5));
-            //// add your entities here
-            //dxf.AddEntity(entity);
-            //// save to file
-            //dxf.Save(file);
-
-            //bool isBinary;
-            //// this check is optional but recommended before loading a DXF file
-            //DxfVersion dxfVersion = DxfDocument.CheckDxfFileVersion(file, out isBinary);
-            //// netDxf is only compatible with AutoCad2000 and higher DXF version
-            //if (dxfVersion < DxfVersion.AutoCad2000) return;
-            //// load file
-
             var loaded = DxfDocument.Load(file);
-
             var objectList = Calculate(loaded);
             Render(objectList, mainDrawingCanvas);
 
@@ -294,6 +330,7 @@ namespace ReverseKinematic
 
         public List<Shape> Calculate(DxfDocument loaded)
         {
+
             foreach (var item in loaded.Lines) ObjectList.Add(new Line(item));
 
             foreach (var item in loaded.Arcs) ObjectList.Add(new Arc(item));
@@ -306,6 +343,18 @@ namespace ReverseKinematic
 
             foreach (var item in loaded.LwPolylines) ObjectList.Add(new LwPolyline(item));
 
+            foreach (var item in loaded.Dimensions) ObjectList.Add(new Dimension(item));
+
+            //foreach (LinearDimension dimension in loaded.Dimensions.Where(d => d is LinearDimension))
+            //{
+            //    foreach (var item in loaded.Lines) ObjectList.Add(new Line(dimension.FirstReferencePoint.X, dimension.TextReferencePoint.Y, dimension.SecondReferencePoint.X, dimension.TextReferencePoint.Y));
+            //   // ObjectList.Add(new Text("Ala ma kota", AdjustedColorsMean.Brown, dimension.TextReferencePoint.X, dimension.TextReferencePoint.Y));
+            //}
+
+            //   var x = tempDimensions.FirstReferencePoint;
+
+            //foreach (var item in loaded.Dimensions) ObjectList.Add(new Line(item.));
+            //loaded.Dimensions.First().
 
             foreach (var item in ObjectList)
             {
@@ -326,6 +375,21 @@ namespace ReverseKinematic
             mainDrawingCanvas.Height = MaxXMaxY.Y - MinXMinY.Y;
 
             foreach (var item in ObjectList) item.Draw(mainDrawingCanvas, MinXMinY);
+        }
+
+        public void Sort()
+        {
+            var tempList = partsList.ToList();
+            tempList.Sort((x, y) => Math.Abs(x.Mass-mass).CompareTo(Math.Abs(y.Mass- mass)));
+            PartsList = new ObservableCollection<Part>(tempList);
+            OnPropertyChanged(nameof(PartsList));
+        }
+
+        private SerialPortCommunication serialData=new SerialPortCommunication();
+        public SerialPortCommunication SerialData
+        {
+            get { return serialData; }
+            set { serialData = value; }
         }
     }
 }

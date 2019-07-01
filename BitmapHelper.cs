@@ -27,7 +27,7 @@ namespace ReverseKinematic
             // Create the pixel array.
             Pixels = new byte[width * height * 4];
 
-            // Calculate the stride.
+            // Update the stride.
             Stride = width * 4;
         }
 
