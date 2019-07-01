@@ -67,6 +67,8 @@
       <DependentUpon>CameraView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ColorRecognition.cs" />
+    <Compile Include="MaterialRecognition.cs" />
+    <Compile Include="WeightRecognition.cs" />
     <Compile Include="MaterialEnumType.cs" />
     <Compile Include="SerialPortCommunication.cs" />
     <Compile Include="SurfaceEnumType.cs" />
