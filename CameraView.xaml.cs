@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,13 +16,12 @@ using System.Windows.Shapes;
 
 namespace ReverseKinematic
 {
-    /// <summary>
-    /// Interaction logic for CameraView.xaml
-    /// </summary>
+
     public partial class CameraView : Window
     {
         const int pixelSize = 10;
         const int cameraResolution = 15;
+
         ObservableCollection<Rectangle> PixelsCollection = new ObservableCollection<Rectangle>();
         ObservableCollection<Rectangle> RedPixelsCollection = new ObservableCollection<Rectangle>();
         ObservableCollection<Rectangle> GreenPixelsCollection = new ObservableCollection<Rectangle>();
@@ -148,8 +148,31 @@ namespace ReverseKinematic
             }
             MeanRectangle.Fill= new SolidColorBrush(Color.FromRgb(MeanColor[0], MeanColor[1], MeanColor[2]));
         }
-    
 
+        public void CustomShow()
+        {
 
+            Show();
+            ShowInTaskbar = true;
+        }
+
+        private void CameraView_OnClosing(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
+            ShowInTaskbar = false;
+
+        }
+
+        private void RecalibrationButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            //   throw new NotImplementedException();
+            EventArgs recalibrate= new EventArgs();
+          
+            EventHandler handler = RecalibrateThreshold;
+            handler?.Invoke(this, recalibrate);
+        }
+
+        public event EventHandler RecalibrateThreshold;
     }
 }

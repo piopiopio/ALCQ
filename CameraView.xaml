@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReverseKinematic"
         mc:Ignorable="d"
-        Title="CameraView" Height="500" Width="800">
+        Title="CameraView" Height="500" Width="800"
+        Closing="CameraView_OnClosing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -49,6 +50,9 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Label Grid.Column="0" Grid.Row="0" Name="RedColorValueText" Content="Red: "></Label>
@@ -69,6 +73,7 @@
             <Label Grid.Column="1" Grid.Row="6" Name="BlueStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
             <Label Grid.Column="0" Grid.Row="7" Name="WhiteStandardDeviationText" Content="White standard deviation: "></Label>
             <Label Grid.Column="1" Grid.Row="7" Name="WhiteStandardDeviation" Content="0" ContentStringFormat="N3" ></Label>
-        </Grid>
+            <Button  Grid.Column="0" Grid.Row="10" Name="RecalibrationButton" Content="Recalibrate" Click="RecalibrationButton_OnClick"></Button>
+        </Grid> 
     </Grid>
 </Window>

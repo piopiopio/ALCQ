@@ -66,15 +66,20 @@
     <Compile Include="CameraView.xaml.cs">
       <DependentUpon>CameraView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ColorRecognition.cs" />
-    <Compile Include="MaterialRecognition.cs" />
-    <Compile Include="WeightRecognition.cs" />
+    <Compile Include="ColorAgent.cs" />
+    <Compile Include="MaterialAgent.cs" />
+    <Compile Include="Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Surface.cs" />
+    <Compile Include="TextHelper.cs" />
+    <Compile Include="WeightAgent.cs" />
     <Compile Include="MaterialEnumType.cs" />
     <Compile Include="SerialPortCommunication.cs" />
     <Compile Include="SurfaceEnumType.cs" />
     <Compile Include="StatusEnumType.cs" />
     <Compile Include="EnumerationExtension.cs" />
-    <Compile Include="Material.cs" />
+    <Compile Include="Materials.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="Scene.cs" />
@@ -97,6 +102,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -142,6 +151,24 @@
     <Resource Include="Resources\Laser_cutting_machine.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\global-settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\refresh-button.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\save-icon-silhouette.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\photo-camera.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\coil-146521_640.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\weight-scale-2402966_640.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

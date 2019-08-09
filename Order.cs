@@ -9,6 +9,15 @@ namespace ReverseKinematic
     public class Order
     {
         private string date;
+
+        public Order(string date, string orderNumber, string quantity, string supplier, string purchaser)
+        {
+            Date = date;
+            OrderNumber = orderNumber;
+            Quantity = quantity;
+            Supplier = supplier;
+            Purchaser = purchaser;
+        }
         public string Date
         {
             get { return date; }
@@ -19,13 +28,13 @@ namespace ReverseKinematic
             }
         }
 
-        private string number;
-        public string Number
+        private string _orderNumber;
+        public string OrderNumber
         {
-            get { return number; }
+            get { return _orderNumber; }
             set
             {
-                number = value;
+                _orderNumber = value;
 
             }
         }
@@ -51,11 +60,11 @@ namespace ReverseKinematic
 
             }
         }
-        private int quantity;
+        private string quantity;
         public string Quantity
         {
-            get { return quantity.ToString(); }
-            set { quantity = int.Parse(value); }
+            get { return quantity; }
+            set { quantity=value; }
         }
         private bool isSelected;
         public bool IsSelected

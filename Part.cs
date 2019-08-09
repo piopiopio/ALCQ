@@ -46,15 +46,15 @@ namespace ReverseKinematic
             name=stringsList[2];
             Surface = SurfaceEnumType.AnthracitePaint;
 
-            var o=new Order();
-            o.Number = "PK/233/219";
-            o.Date = "01.06.2019";
-            o.Quantity = "10";
-            o.Supplier = "CNC Polska";
-            o.Purchaser = "Piotr";
+            //var o=new Order();
+            //o.OrderNumber = "PK/233/219";
+            //o.Date = "01.06.2019";
+            //o.Quantity = "10";
+            //o.Supplier = "CNC Polska";
+            //o.Purchaser = "Piotr";
 
 
-            OrderList.Add(o);
+            //OrderList.Add(o);
         }
 
 

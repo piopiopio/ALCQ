@@ -8,8 +8,9 @@
         mc:Ignorable="d"
         Title="Automatic laser cut quotation" Name="MainWindow1" WindowState="Maximized"
         SizeChanged="MainWindow_OnSizeChanged" MinWidth="900" d:DesignHeight="917.5"
-        MouseWheel="RobotCanvas_OnMouseWheel" Width="2233.6" ShowInTaskbar="True"
-        Icon="Resources/Laser_cutting_machine.png">
+         Width="2233.6" ShowInTaskbar="True"
+        Icon="Resources/Laser_cutting_machine.png"
+        Loaded="MainWindow_OnLoaded">
 
     <Window.Resources>
         <system:Double x:Key="SmallEllipseMoveToCenter">15</system:Double>
@@ -46,8 +47,11 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
   
             </Grid.RowDefinitions>
 
@@ -55,19 +59,33 @@
             <!--<Button Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Content="Add new files" Name="LoadFile" Height="20"
                     VerticalAlignment="Top" Click="LoadFile_OnClick" />-->
 
-            <Label Grid.Column="0" Grid.Row="1" Content="Part mass:" />
+            <Label Grid.Column="0" Grid.Row="1" Content="Part mass[g]:" />
             <!--<TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.Mass}" />-->
-            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.SerialData.MassGrams}" />
+            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Scene.Mass, StringFormat=N1}" />
+
+            <Label Grid.Column="0" Grid.Row="4" Content="Inductive sensor read:" />
+            <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding Scene.InductiveSensorRead}" />
 
 
-            <Label Grid.Column="0" Grid.Row="2" Content="Quantity: " />
-            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Scene.Pieces}" />
+            <!--<Label Grid.Column="0" Grid.Row="2" Content="Quantity: " />
+            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Scene.Pieces}" />-->
 
 
-            <Label Grid.Column="0" Grid.Row="3" Content="Material:" HorizontalAlignment="Left" Width="487" />
-            <ComboBox Grid.Column="1" Grid.Row="3" Name="MaterialSelector"
-                      ItemsSource="{Binding Scene.Material.MaterialList}"
-                      SelectedItem="{Binding Scene.Material.SelectedMaterial}" SelectedIndex="0">
+            <Label Grid.Column="0" Grid.Row="2" Content="Material:" HorizontalAlignment="Left" Width="487" />
+            <ComboBox Grid.Column="1" Grid.Row="2" Name="MaterialSelector"
+                      ItemsSource="{Binding Scene.Materials.MaterialList}"
+                      SelectedItem="{Binding Scene.Materials.SelectedMaterial}" SelectedIndex="0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding Item1}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>      
+            
+            <Label Grid.Column="0" Grid.Row="3" Content="Surface:" HorizontalAlignment="Left" Width="487" />
+            <ComboBox Grid.Column="1" Grid.Row="3" Name="SurfaceSelector"
+                      ItemsSource="{Binding Scene.Surface.SurfacesList}"
+                      SelectedItem="{Binding Scene.Surface.SelectedSurface}" SelectedIndex="0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Label Content="{Binding Item1}" />
@@ -75,48 +93,23 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!--<Label Grid.Column="0" Grid.Row="4" Content="Thickness:" />
-            <ComboBox Grid.Column="1" Grid.Row="4" Name="ThicknessSelector"
-                      ItemsSource="{Binding Scene.Material.MaterialThicknessList}"
-                      SelectedItem="{Binding Scene.Material.SelectedThickness}" SelectedIndex="0">
-                <ComboBox.ItemTemplate>
+            <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" Content="Search part" Name="SearchPartButton" Click="SearchPartButton_OnClick"></Button>
+
+            <Label Grid.Column="0" Grid.Row="5" Content="Filter order:" HorizontalAlignment="Left" Width="487"  />
+            <ComboBox Grid.Column="1" Grid.Row="5" Name="Order" 
+                      ItemsSource="{Binding Scene.Orders}"
+                      SelectedItem="{Binding Scene.SelectedOrder}" SelectedIndex="0">
+                <!--<ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <Label Content="{Binding Item1}" />
+                        <Label Content="{Binding Orders}" />
                     </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>-->
-
-            <!--<Label Grid.Row="5" Grid.Column="0" Content="{Binding Scene.Length}" ContentStringFormat="Length: {0:f2}mm" />
-
-
-            <Label Grid.Row="6" Grid.Column="0" Content="{Binding Scene.RectangleArea}"
-                   ContentStringFormat="Sheet area: {0:f2}m² " />-->
-
-
-
-            <!--<Label Grid.Row="7" Grid.Column="0" Content="{Binding ActualWidth, ElementName=MainDrawingCanvas}" ContentStringFormat="X dimension: {0:f2}mm"/>
-
-            <Label Grid.Row="8" Grid.Column="0" Content="{Binding ActualHeight, ElementName=MainDrawingCanvas}" ContentStringFormat="Y dimension: {0:f2}mm"/>-->
-
-
-
-            <!--<Label Grid.Column="0" Grid.Row="9" Name="MaterialCost" Content="{Binding Scene.MaterialCost}"
-                   ContentStringFormat="Material cost: {0:f2}zł" />
-            <Label Grid.Column="0" Grid.Row="10" Content="{Binding Scene.CuttingCost}"
-                   ContentStringFormat="Cutting cost: {0:f2}zł" />
-
-
-            <Label Grid.Column="0" Grid.Row="11" Content="{Binding Scene.InitializationFee}"
-                   ContentStringFormat="Initialization fee: {0:f2}zł" />
-
-            <Label Grid.Column="0" Grid.Row="12" Content="{Binding Scene.TotalPrice}"
-                   ContentStringFormat="Total price: {0:f2}zł" FontWeight="Bold"/>-->
-            <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Search part" Name="SearchPartButton" Click="SearchPartButton_OnClick"></Button>
-            <ListView Name="MyListView" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" ItemsSource="{Binding Scene.PartsList}" PreviewMouseDown="ListViewItem_PreviewMouseLeftButtonDown">
+                </ComboBox.ItemTemplate>-->
+            </ComboBox>
+            <ListView Name="MyListView" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7" ItemsSource="{Binding Scene.FilteredPartsList}" PreviewMouseDown="ListViewItem_PreviewMouseLeftButtonDown" Margin="0,40,0,0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
-                        <!--<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />-->
+
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.View >
@@ -125,38 +118,35 @@
                         <GridViewColumn Header="Material" Width="90" DisplayMemberBinding="{Binding Material}"/>
                         <GridViewColumn Header="Surface" Width="120" DisplayMemberBinding="{Binding Surface}"/>
                         <GridViewColumn Header="Mass[g]" Width="120" DisplayMemberBinding="{Binding Mass, StringFormat=F2}"/>
-                        <GridViewColumn Header="IsSelected" Width="90" DisplayMemberBinding="{Binding IsSelected}"/>
+                        <!--<GridViewColumn Header="IsSelected" Width="90" DisplayMemberBinding="{Binding IsSelected}"/>-->
                     </GridView>
                 </ListView.View>
             </ListView>
 
-            <Label Grid.Row="6" Content="Element in order additional info:"></Label>
-            <ListView Name="MyListView2" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7" ItemsSource="{Binding Scene.CurrentPart.OrderList}">
+            <Label Grid.Row="8" Content="Detailed info:"  Margin="0,10,0,0"></Label>
+            <ListView Name="MyListView2" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="9" ItemsSource="{Binding Scene.CurrentPart.OrderList}" Margin="50,0,0,0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="IsSelected" Value="{Binding IsSelected}"></Setter>
-                        <!--<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />-->
+
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.View >
                     <GridView  >
-                        <GridViewColumn Header="Order number" Width="120" DisplayMemberBinding="{Binding Number, StringFormat=F2}"/>
+                        <GridViewColumn Header="Order Number" Width="120" DisplayMemberBinding="{Binding OrderNumber, StringFormat=F2}"/>
                         <GridViewColumn Header="Date" Width="90" DisplayMemberBinding="{Binding Date, StringFormat=F2}"/>
                         <GridViewColumn Header="Quantity" Width="90" DisplayMemberBinding="{Binding Quantity, StringFormat=F2}"/>
                         <GridViewColumn Header="Supplier" Width="120" DisplayMemberBinding="{Binding Supplier}"/>
-                        <GridViewColumn Header="Purchaser" Width="120" DisplayMemberBinding="{Binding Purchaser}"/>
-                        <!--<GridViewColumn Header="Status" Width="120" DisplayMemberBinding="{Binding Status}"/>-->
-                        <!--<GridViewColumn Header="Status" Width="120" >
-                            <ComboBox  Grid.Row="8" ItemsSource="{Binding Source={reverseKinematic:Enumeration {x:Type reverseKinematic:Status}}}" DisplayMemberPath="Description" SelectedValue="{Binding Status}"  SelectedValuePath="Value"  />
-                        </GridViewColumn>-->
-                        <GridViewColumn Header="StatusEnumType" Width="240">
+                        <GridViewColumn Header="Purchaser" Width="150"  DisplayMemberBinding="{Binding Purchaser}"/>
+
+                        <!--<GridViewColumn Header="StatusEnumType" Width="240">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <!--<TextBox Text="{Binding Purchaser}"></TextBox>-->
+                                    --><!--<TextBox Text="{Binding Purchaser}"></TextBox>--><!--
                                     <ComboBox  Grid.Row="8" ItemsSource="{Binding Source={reverseKinematic:Enumeration {x:Type reverseKinematic:StatusEnumType}}}" DisplayMemberPath="Description" SelectedValue="{Binding Status1}"  SelectedValuePath="Value"  />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+                        </GridViewColumn>-->
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -173,6 +163,9 @@
 
 <!--<Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="15" Content="Click into closed shape interior to calculate utilization" VerticalAlignment="Bottom" BorderBrush="Black" BorderThickness="1"></Label>-->
 
+
+            <Image Name="RefreshButton" Source="Resources/refresh-button.png" Grid.Row="16" Grid.Column="0" Height="50" MouseDown="RefreshButton_OnMouseDown"></Image>
+<Image Name="SettingsButton" Source="Resources/global-settings.png" Grid.Row="16" Grid.Column="1" Height="50" MouseDown="SettingsButton_OnMouseDown"></Image>
         </Grid>
 
         <DockPanel Name="MainDockPanel" Grid.Column="0" Grid.Row="0" Background="White">
@@ -183,7 +176,7 @@
                 <!--<Grid>-->
 
 
-                <Canvas Background="AliceBlue" Name="MainDrawingCanvas" ZIndex="2" MouseDown="MainDrawingCanvas_OnMouseDown"/>
+                <!--<Canvas Background="AliceBlue" Name="MainDrawingCanvas" ZIndex="2" MouseDown="MainDrawingCanvas_OnMouseDown"/>-->
 
                 <!--<ItemsControl ItemsSource="{Binding Scene.ObstaclesCollection}" >
                         <ItemsControl.ItemContainerStyle >
